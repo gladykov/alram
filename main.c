@@ -5,11 +5,12 @@
 #include <string.h>
 
 #define BUFSIZE 128
+#define MAX_PROCESS_NAME_SIZE 20
 
 struct configStruct {
     int OCCUPIED_RAM_THRESHOLD;
     int POLL_FREQUENCY;
-    char PROCEESES_TO_KILL[50][20];
+    char PROCEESES_TO_KILL[50][MAX_PROCESS_NAME_SIZE];
 };
 
 struct configStruct config = {
@@ -88,20 +89,21 @@ void get_config(void) {
                 config.OCCUPIED_RAM_THRESHOLD = atoi(value);
             } else if (strcmp(name, "POLL_FREQUENCY") == 0) {
                 config.POLL_FREQUENCY = atoi(value);
-            } else if (strcmp(name, "PROCEESES_TO_KILL") == 0) {
+            }
+            else if (strcmp(name, "PROCEESES_TO_KILL") == 0) {
                 char allApps[500];
                 int n = sscanf(value, "[%99[^]]]", allApps);
 
                 if (n > 0) {
-                    printf("All apps found is %s\n", allApps);
-                    printf("Number of apps to kill: %i\n", count_char_occurrences(allApps, ',') + 1);
+                    printf("Apps config is: %s\n", allApps);
+                    printf("Detected number of apps to kill: %i\n", count_char_occurrences(allApps, ',') + 1);
 
                     int number_of_apps = count_char_occurrences(allApps, ',') + 1;
                     char *token;
                     token = strtok(allApps, ",");
 
                     for (int i = 0; i < number_of_apps; i++) {
-                        char *killApp;
+                        char killApp[MAX_PROCESS_NAME_SIZE];
                         sscanf(token, "\"%[^\"]\"", killApp);
                         strcpy(config.PROCEESES_TO_KILL[i], killApp);
                         token = strtok(NULL, ",");
@@ -117,7 +119,7 @@ void get_config(void) {
 
 unsigned long long get_available_memory(void) {
     FILE *file;
-// We need to use meminfo, because _SC_AVPHYS_PAGES is a lie
+    // We need to use meminfo, because _SC_AVPHYS_PAGES is a lie
     char filename[] = "/proc/meminfo";
     unsigned long mem_free = 0;
 
@@ -153,7 +155,6 @@ void show_notification(char summary[], char body[], GApplication *application) {
     g_application_send_notification(application, NULL, notification);
     g_object_unref(icon);
     g_object_unref(notification);
-//    g_object_unref (application);
 }
 
 int kill_process(int pid) {
