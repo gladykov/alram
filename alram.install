@@ -1,0 +1,9 @@
+post_install() {
+	echo "Starting alram service"
+	systemctl --user enable alram.service --now
+}
+
+pre_remove() {
+	echo "Stopping alram service"
+	systemctl --user disable alram.service --now
+}
