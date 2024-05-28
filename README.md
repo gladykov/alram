@@ -1,7 +1,9 @@
 # alram
 Alram - Alarm for RAM, when available memory is below threshold, with optional task killer.
 
-BTW. I use Arch.
+TL;DR Free RAM monitor.
+
+For Linux.
 
 ![alt text](https://github.com/gladykov/alram/blob/main/alram.png?raw=true)
 
@@ -12,7 +14,7 @@ If you define kill list - it will kill those processes, when above happens.
 
 ## Why?
 
-I drive my laptop without SWAP file, because I can. Which is OK in 80% of cases. But sometimes I forget about it, and I saturate memory. And this is a problem. So better to kill non important processes, than to hard restart.
+I drive without SWAP file, because I can. Which is OK in 80% of cases. But sometimes I forget about it, and I saturate memory. And this is a problem. So better to kill non important processes, than to hard restart.
 
 And because it is never too late to write first program in C.
 
@@ -33,3 +35,11 @@ POLL_FREQUENCY=2
 # Uncomment, to kill processes in case of low memory situation. 
 #PROCEESES_TO_KILL=["spotify","slack","webstorm"]
 ```
+
+## Contributions
+
+Are welcomed
+
+## BTW.
+
+I use Arch.
