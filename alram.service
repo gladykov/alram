@@ -1,0 +1,9 @@
+[Unit]
+Description=Alram service
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/alram
+
+[Install]
+WantedBy=default.target

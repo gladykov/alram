@@ -24,10 +24,8 @@ bool NOTIFICATION_SHOWN = false;
 
 bool check_if_param_in_array(char *string) {
 
-    for(size_t i = 0; i < sizeof(KNOWN_CONFIG_OPTIONS)/sizeof(KNOWN_CONFIG_OPTIONS[0]); ++i)
-    {
-        if (strcmp(KNOWN_CONFIG_OPTIONS[i], string) == 0)
-        {
+    for (size_t i = 0; i < sizeof(KNOWN_CONFIG_OPTIONS) / sizeof(KNOWN_CONFIG_OPTIONS[0]); ++i) {
+        if (strcmp(KNOWN_CONFIG_OPTIONS[i], string) == 0) {
             return true;
         }
     }
@@ -38,7 +36,7 @@ int count_char_occurrences(char string[], int character) {
     int count = 0;
     char *ptr = strchr(string, character);
 
-    while((ptr = strchr(ptr, character)) != NULL) {
+    while ((ptr = strchr(ptr, character)) != NULL) {
         count++;
         ptr++;
 
@@ -51,22 +49,22 @@ void get_config(void) {
 
     char *filename = "/.config/alram.conf";
     char *home = getenv("HOME");
-    char delim='=';
-    char delimStr[]="=";
+    char delim = '=';
+    char delimStr[] = "=";
 
     strncat(home, filename, 21);
-    printf("%s\n", home);
+    printf("Looking for config file in %s\n", home);
 
     FILE *file;
     char buffer[256];
     file = fopen(home, "r");
 
     if (file == NULL) {
-        perror("Error opening config file!\n");
+        printf("Error opening config file. Will use defaults. \n");
         return;
     }
 
-    while (fgets (buffer, 256, file)) {
+    while (fgets(buffer, 256, file)) {
 
         if (buffer[0] != '\n' && buffer[0] != '#') {
 
@@ -90,8 +88,7 @@ void get_config(void) {
                 config.OCCUPIED_RAM_THRESHOLD = atoi(value);
             } else if (strcmp(name, "POLL_FREQUENCY") == 0) {
                 config.POLL_FREQUENCY = atoi(value);
-            }
-            else if (strcmp(name, "PROCEESES_TO_KILL") == 0) {
+            } else if (strcmp(name, "PROCEESES_TO_KILL") == 0) {
                 char allApps[500];
                 int n = sscanf(value, "[%99[^]]]", allApps);
 
@@ -110,49 +107,35 @@ void get_config(void) {
                         token = strtok(NULL, ",");
                     }
                 }
-                }
+            }
         }
 
-        }
-        fclose(file);
-
-    printf("OCCUPIED_RAM_THRESHOLD: %i\n", config.OCCUPIED_RAM_THRESHOLD);
-    printf("POLL_FREQUENCY: %i\n", config.POLL_FREQUENCY);
-//
-    for (int u=0;u < (sizeof (config.PROCEESES_TO_KILL) /sizeof (config.PROCEESES_TO_KILL[0]));u++) {
-        if (strcmp(config.PROCEESES_TO_KILL[u], "") == 0) {
-            break;
-        }
-        printf("Added process to kill list: %s\n", config.PROCEESES_TO_KILL[u]);
-    }
-}
-
-
-
-unsigned long long get_available_memory(void)
-{
-FILE *file;
-// We need to use meminfo, because _SC_AVPHYS_PAGES is a lie
-char filename[] = "/proc/meminfo";
-unsigned long mem_free = 0;
-
-if ((file = fopen (filename, "r")) != NULL)
-{
-    char buffer[256];
-    while (fgets (buffer, sizeof (buffer), file) != NULL) {
-        if (sscanf(buffer, "MemAvailable:\t%lu kB", &mem_free) != 0) {
-            break;
-        }
     }
     fclose(file);
 }
 
-return mem_free * 1000;
+
+unsigned long long get_available_memory(void) {
+    FILE *file;
+// We need to use meminfo, because _SC_AVPHYS_PAGES is a lie
+    char filename[] = "/proc/meminfo";
+    unsigned long mem_free = 0;
+
+    if ((file = fopen(filename, "r")) != NULL) {
+        char buffer[256];
+        while (fgets(buffer, sizeof(buffer), file) != NULL) {
+            if (sscanf(buffer, "MemAvailable:\t%lu kB", &mem_free) != 0) {
+                break;
+            }
+        }
+        fclose(file);
+    }
+
+    return mem_free * 1000;
 }
 
 
-unsigned long long get_total_system_memory(void)
-{
+unsigned long long get_total_system_memory(void) {
     long pages = sysconf(_SC_PHYS_PAGES);
     long page_size = sysconf(_SC_PAGE_SIZE);
     return pages * page_size;
@@ -163,18 +146,18 @@ unsigned get_free_memory_percentage(void) {
 }
 
 void show_notification(char summary[], char body[], GApplication *application) {
-    GNotification *notification = g_notification_new (summary);
-    g_notification_set_body (notification, body);
-    GIcon *icon = g_themed_icon_new ("dialog-warning");
-    g_notification_set_icon (notification, icon);
-    g_application_send_notification (application, NULL, notification);
-    g_object_unref (icon);
-    g_object_unref (notification);
+    GNotification *notification = g_notification_new(summary);
+    g_notification_set_body(notification, body);
+    GIcon *icon = g_themed_icon_new("dialog-warning");
+    g_notification_set_icon(notification, icon);
+    g_application_send_notification(application, NULL, notification);
+    g_object_unref(icon);
+    g_object_unref(notification);
 //    g_object_unref (application);
 }
 
-int kill_process(int pid){
-    printf("Attempting to kill pid of application %i\n", pid);
+int kill_process(int pid) {
+    printf("Attempting to kill pid: %i\n", pid);
 
     char cmd[36] = "kill -INT ";
     char pidChar[10];
@@ -184,7 +167,7 @@ int kill_process(int pid){
     FILE *fp;
 
     if ((fp = popen(cmd, "r")) == NULL) {
-        printf("Error opening pipe!\n");
+        printf("Error executing kill!\n");
         return -1;
     }
 
@@ -195,7 +178,7 @@ int kill_process(int pid){
     return 0;
 }
 
-int get_process_pid(char name[]){
+int get_process_pid(char name[]) {
     printf("Looking for pid of application %s\n", name);
 
     char cmd[36] = "pgrep --oldest ";
@@ -205,7 +188,7 @@ int get_process_pid(char name[]){
     FILE *fp;
 
     if ((fp = popen(cmd, "r")) == NULL) {
-        printf("Error opening pipe!\n");
+        printf("Error running pgrep!\n");
         return -1;
     }
 
@@ -227,42 +210,52 @@ int main(void) {
 
     get_config();
 
+    printf("OCCUPIED_RAM_THRESHOLD: %i\n", config.OCCUPIED_RAM_THRESHOLD);
+    printf("POLL_FREQUENCY: %i\n", config.POLL_FREQUENCY);
+
+    if (config.PROCEESES_TO_KILL[0][0] == 0) {
+        printf("PROCEESES_TO_KILL is empty. Thou shalt not kill.\n");
+    } else {
+        for (int u = 0; u < (sizeof(config.PROCEESES_TO_KILL) / sizeof(config.PROCEESES_TO_KILL[0])); u++) {
+            if (strcmp(config.PROCEESES_TO_KILL[u], "") == 0) {
+                break;
+            }
+            printf("Added process to kill list: %s\n", config.PROCEESES_TO_KILL[u]);
+        }
+    }
+
     unsigned free_memory_percentage;
 
     while (true) {
-
         free_memory_percentage = get_free_memory_percentage();
-        printf("%u\n", free_memory_percentage);
 
-        if (get_free_memory_percentage() <= config.OCCUPIED_RAM_THRESHOLD && !NOTIFICATION_SHOWN) {
+        if (free_memory_percentage <= config.OCCUPIED_RAM_THRESHOLD && !NOTIFICATION_SHOWN) {
 
-            show_notification("Occupied RAM threshold exceeded", "If you defined kill list, I will attempt to kill some processes", application);
+            show_notification("Occupied RAM threshold exceeded",
+                              "If you defined kill list, I will attempt to kill some processes", application);
             NOTIFICATION_SHOWN = true;
 
-            for (size_t a = 0; a < sizeof(config.PROCEESES_TO_KILL) / sizeof(config.PROCEESES_TO_KILL[0]); a++)
-            {
+            for (size_t a = 0; a < sizeof(config.PROCEESES_TO_KILL) / sizeof(config.PROCEESES_TO_KILL[0]); a++) {
                 if (strcmp(config.PROCEESES_TO_KILL[a], "") == 0) {
                     break;
                 }
 
                 int processToKill = get_process_pid(config.PROCEESES_TO_KILL[a]);
                 if (processToKill == -1) {
-                    return 1;
+                    continue;
                 } else if (processToKill != 0) {
-//                    int kill_result = kill_process(processToKill);
-//                    if (kill_result == -1) {
-//                        return 1;
-//                    }
+                    int kill_result = kill_process(processToKill);
+                    if (kill_result == -1) {
+                        continue;
+                    }
                 }
             }
-
-
-        } else if (NOTIFICATION_SHOWN && get_free_memory_percentage() >= config.OCCUPIED_RAM_THRESHOLD) {
+        } else if (NOTIFICATION_SHOWN && free_memory_percentage >= config.OCCUPIED_RAM_THRESHOLD) {
             // Once we recover, we can start monitoring again
+            printf("Recovered to memory levels above threshold");
             NOTIFICATION_SHOWN = false;
         }
-
+        fflush(stdout);
         sleep(config.POLL_FREQUENCY);
     }
-
 }
