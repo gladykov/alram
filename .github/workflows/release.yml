@@ -1,0 +1,21 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - '*'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build
+        run: make
+      - uses: ncipollo/release-action@v1
+        with:
+          artifacts: "alram.service,alram,LICENSE"
+          prerelease: true
