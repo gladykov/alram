@@ -20,7 +20,7 @@ And because it is never too late to write first program in C.
 
 ## How?
 
-1. Build yourself or install from AUR
+1. Build yourself: `make` or install from AUR: `pacaman alram-alarm-for-ram`
 2. `systemctl --user enable alram.service --now` or `alram`
 
 
